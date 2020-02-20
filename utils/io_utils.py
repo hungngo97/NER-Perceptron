@@ -16,6 +16,7 @@ WORD_DATA_SEP_PATTERN = '|'.join(map(re.escape, _WORD_DATA_SEP))
     and its properties { 'text': Michael, 'pos': Noun, 'chunk': ABC, 'ner_label': PER}
 """
 def read_conll_file(filename):
+    # TODO: Should add a START token here
     document_list = list()
     with open(filename, "r") as conll_file:
         file = conll_file.read()
@@ -36,6 +37,21 @@ def read_conll_file(filename):
                 document_parse.append(sentence_parse)
             document_list.append(document_parse)
     return document_list
+
+"""
+    @Returns a dict frequency of all NER labels from list of documents
+"""
+def get_labels(documents):
+    labels = {}
+    for document in documents:
+        for sentence in document:
+            for word in sentence:
+                ner_label = word['ner_label']
+                if ner_label not in labels:
+                    labels[ner_label] = 0
+                labels[ner_label] += 1
+    return labels
+                
 
 
 """
