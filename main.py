@@ -1,25 +1,36 @@
-from utils.io_utils import (read_sentences_from_file)
+from utils.io_utils import (read_conll_file)
 from utils.math_utils import *
 from constants.model_constants import (UNK, START, STOP)
 from constants.constants import (DEV_DATA_FILE, TRAIN_DATA_FILE, TEST_DATA_FILE)
-from models.UnigramLanguageModel import (UnigramLanguageModel)
-from models.BigramLanguageModel import (BigramLanguageModel)
-from models.TrigramLanguageModel import (TrigramLanguageModel)
-from models.LinearInterpolationLanguageModel import (LinearInterpolationLanguageModel)
+from models.Perceptron import (Perceptron)
 from evaluator.evaluator import ( PerplexityEvaluator )
 
-def print_perplexity_score(perplexity_evaluator, sentences, unigram_model = None, bigram_model = None, trigram_model = None):
-    if unigram_model != None:
-        print("Unigram Perplexity Score")
-        print(perplexity_evaluator.get_unigram_perplexity(unigram_model, sentences))
-    if bigram_model != None:
-        print("Bigram Perplexity Score")
-        print(perplexity_evaluator.get_bigram_perplexity(bigram_model, sentences))
-    if trigram_model != None:
-        print("Trigram Perplexity Score")
-        print(perplexity_evaluator.get_trigram_perplexity(trigram_model, sentences))
-        
 #Read data input
+parsed_document_list = read_conll_file(TRAIN_DATA_FILE)
+logger.info('Parse completed (%d documents).' % len(parsed_document_list))
+# COPY THIS STEP
+logger.info('Building word list from train data.')
+training_words = parsed_documents_to_words(parsed_document_list)
+
+# Maybe copy the Context Annotator but don't need to until the end
+logger.info('Annotate training data.')
+annotate_data(training_words)
+
+# No need
+logger.info('Convert gold label tag scheme from IOB to BILOU.')
+BILOU.encode(training_words, tag_attr='gold_label')
+
+logger.info('Set gold label as tag (for model tag features).')
+for word in training_words:
+    word.tag = word.gold_label
+
+logger.info('Train model.')
+trained_model_params, class_lexicon = train(
+    training_words, L1_FEATURES, NUM_TRAIN_ITERATIONS)
+save_model(trained_model_params, args.model_file,
+           class_lexicon, args.lexicon_file)
+
+
 sentences = read_sentences_from_file(TRAIN_DATA_FILE)
 dev_sentences = read_sentences_from_file(DEV_DATA_FILE)
 test_sentences = read_sentences_from_file(TEST_DATA_FILE)

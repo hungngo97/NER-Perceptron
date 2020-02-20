@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
-DEV_DATA_FILE = "data/brown.dev.txt"
-TRAIN_DATA_FILE = "data/brown.train.txt"
-TEST_DATA_FILE = "data/brown.test.txt"
+DEV_DATA_FILE = "data/eng.dev.small"
+TRAIN_DATA_FILE = "data/eng.train.small"
+TEST_DATA_FILE = "data/eng.test.small"
