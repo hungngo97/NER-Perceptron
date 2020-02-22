@@ -71,34 +71,36 @@ class FeatureGenerator:
         features['<WORD>' + '-' + word+ suffix] = 1
 
         return features
-            
-            
-    def generate_local_feature(self, words, i, word, current_label, prev_label):
+
+
+
+    def generate_local_feature(self, words, i, current_label):
 
         features = {}
         # Check previous word
-        if (i - 1 >= 0):
+        """if (i - 1 >= 0):
             prev_word = words[i - 1]
             features = self.generate_feature(features, prev_word, '-PRE')
+            """
+        
         if (i + 1 < len(words)):
             next_word = words[i + 1]
             features = self.generate_feature(features, next_word, '-SUFF')
-        
-        features = self.generate_feature(features, word, '')                        
-        features[str(current_label) + '/' + str(prev_label)] = 1
+            
+        features = self.generate_feature(features, words[i], '')         
         
         # Replicate feature for current label
         features = self.replicate_features(features, current_label, 'CUR')
-        # Replicate feature for previous label
-        features = self.replicate_features(features, prev_label, 'PREV')
         return features
         
     def replicate_features(self, features, label, delimiter):
         new_features = {}
         for feature, value in features.items():
-            new_features[feature] = value
+            # new_features[feature] = value
             new_features[feature + '-' + delimiter + '-' + label] = value
         return new_features
+    
+            
     
             
         
