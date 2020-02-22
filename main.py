@@ -44,20 +44,4 @@ prec, recall, fscore = evaluator.metrics(confusion_matrix)
 print('prec', prec, 'recall', recall, 'f1', fscore)
 
 # Output file
-def output_file(self, data, model, label_set):
-    """
-    calculate confusion matrix for data using model
-    model must implement predict method
-    """
-    confusion_matrix = {}
-    for l in label_set:
-        counts = {x:0 for x in label_set}
-        confusion_matrix[l] = counts          
-    for texts, features, labels in data:
-        pred_labels = model.predict_viterbi(texts, label_set)
-        assert len(labels) == len(pred_labels)
-        for i in range(len(labels)):
-            label = labels[i]
-            pred_label = pred_labels[i]
-            confusion_matrix[pred_label][label]+=1
-    return confusion_matrix
+conll_text = format_conll_tagged(model, parsed_document_list, labels_set)
