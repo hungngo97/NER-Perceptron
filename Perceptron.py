@@ -6,10 +6,25 @@ import pickle
 import re
 from models.FeatureGenerator import ( FeatureGenerator )
 from utils.math_utils import *
-
 import Viterbi
 
 featureGenerator = FeatureGenerator()
+""" Feature Generator functions that delegates to FeatureGenerator object"""
+def generate_local_feature(t, tag, texts):
+    features = {}
+    features = featureGenerator.generate_local_feature(texts, t, tag)
+    return features
+
+def generate_global_feature(texts, labels):
+    total = defaultdict(float)
+    for i in range(0, len(texts)):
+        for feat_name, feat_value in generate_local_feature(i, labels[i], texts).items():
+            total[feat_name] += feat_value
+        if(i > 0):
+            total["trans_%s_%s"% (labels[i - 1], labels[i])] += 1
+    return total
+
+
 def train(labels, data, iterations):
     OUTPUT_VOCAB = labels
     weights = defaultdict(float)
@@ -37,31 +52,17 @@ def train(labels, data, iterations):
 def predict_seq(texts, weights, OUTPUT_VOCAB):
     if len(texts) == 0:
         return []
-    Ascores, Bscores = calc_feature_weight_value(texts, weights, OUTPUT_VOCAB)
-    return Viterbi.viterbi(Ascores, Bscores, OUTPUT_VOCAB)
-
-def generate_local_feature(t, tag, texts):
-    features = {}
-    features = featureGenerator.generate_local_feature(texts, t, tag)
-    return features
-
-def generate_global_feature(texts, labels):
-    total = defaultdict(float)
-    for i in range(0, len(texts)):
-        for feat_name, feat_value in generate_local_feature(i, labels[i], texts).items():
-            total[feat_name] += feat_value
-        if(i > 0):
-            total["trans_%s_%s"% (labels[i - 1], labels[i])] += 1
-    return total
+    tag_transition_features, weight_feature_value = calc_feature_weight_value(texts, weights, OUTPUT_VOCAB)
+    return Viterbi.viterbi(tag_transition_features, weight_feature_value, OUTPUT_VOCAB)
 
 def calc_feature_weight_value(texts, weights, OUTPUT_VOCAB):
     N = len(texts)
     
-    Ascores = {} 
-    Ascores = { (tag1,tag2): weights["trans_%s_%s"% (tag1, tag2)] for tag1 in OUTPUT_VOCAB for tag2 in OUTPUT_VOCAB }
-    Bscores = []
+    tag_transition_features = {} 
+    tag_transition_features = { (tag1,tag2): weights["trans_%s_%s"% (tag1, tag2)] for tag1 in OUTPUT_VOCAB for tag2 in OUTPUT_VOCAB }
+    weight_feature_value = []
     for t in range(N):
-        Bscores += [defaultdict(float)]
+        weight_feature_value += [defaultdict(float)]
         for tag in OUTPUT_VOCAB:
-            Bscores[t][tag] += dict_dotprod(weights, generate_local_feature(t, tag, texts))
-    return Ascores, Bscores
+            weight_feature_value[t][tag] += dict_dotprod(weights, generate_local_feature(t, tag, texts))
+    return tag_transition_features, weight_feature_value

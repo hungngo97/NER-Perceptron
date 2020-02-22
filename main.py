@@ -3,7 +3,8 @@ from utils.io_utils import (read_conll_file, get_labels, format_conll_tagged)
 from utils.math_utils import *
 from constants.model_constants import (UNK, START, STOP)
 from constants.constants import (DEV_DATA_FILE, TRAIN_DATA_FILE, TEST_DATA_FILE)
-from models.Perceptron import (Perceptron)
+# from models.Perceptron import (Perceptron)
+from Perceptron import Perceptron
 from evaluator.evaluator import ( Evaluator )
 from models.FeatureGenerator import ( FeatureGenerator )
 NUM_ITER = 3
@@ -66,9 +67,13 @@ labels_set = get_labels(parsed_document_list)
 labels = set(labels_set.keys())
 train_data = make_train_data(parsed_document_list)
 dev_data = make_train_data(parsed_dev_document_list)
-weights = train(labels, train_data, do_averaging=True, devdata=dev_data,numpasses=3)
-test_sentence(train_data, 40, weights, labels)
+
+
+
+weights = train(labels, train_data, iterations=3)
 conll_text_predict = get_predict_tags_output(weights, parsed_document_list, labels)
+
+
 
 with open('output.txt', 'w') as file:
     file.write(conll_text_predict)
