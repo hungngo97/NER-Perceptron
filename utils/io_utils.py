@@ -38,6 +38,34 @@ def read_conll_file(filename):
             document_list.append(document_parse)
     return document_list
 
+def format_conll_tagged(model, document_list, label_set):
+    conll_text = ''
+    for document in document_list:
+        # document_text = '-DOCSTART-'
+        document_text = ''
+        # first_sentence_mock = '\r -X- O O O\n\n'
+        # document_text += first_sentence_mock
+
+        for sentence in document:
+            sentence_text = ""
+            texts = [word['text'] for word in sentence]
+            # labels = [word['ner_label'] for word in sentence]
+            predict_tags = model.predict_viterbi(texts, label_set)
+            # sentence_features = feature_generator.generate_sentence_feature(texts, labels)
+            assert len(predict_tags) == len(sentence)
+            for i in range(len(sentence)):
+                word_attrs = sentence[i]
+                word_text = '%s %s %s %s %s' % (word_attrs['text'], word_attrs['pos'], word_attrs['chunk'],
+                                                  word_attrs['ner_label'], predict_tags[i])
+                word_text += WORD_END_MARK
+
+                sentence_text += word_text
+            sentence_text += '\n'
+
+            document_text += sentence_text
+        conll_text += document_text
+    return conll_text
+
 """
     @Returns a dict frequency of all NER labels from list of documents
 """
